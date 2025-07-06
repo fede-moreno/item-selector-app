@@ -1,0 +1,38 @@
+<div class="p-6 w-[275px]">
+  @if (store.loading()) {
+    <div class="text-center py-8 text-gray-500">Loading...</div>
+  } @else if (store.error()) {
+    <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded">
+      {{ store.error() }}
+    </div>
+  } @else {
+    <app-item-selector
+      [nodes]="store.nodes()"
+      (nodeClick)="store.toggleSelection($event)"
+      (toggleExpand)="store.toggleExpansion($event)"
+    />
+
+    <div class="mt-6 w-[275px]">
+      <p data- class="text-sm mb-3">
+        Selected item IDs:
+        <span>
+          {{
+            store.selectedIds().length > 0
+              ? store.selectedIds().join(", ")
+              : "None"
+          }}</span
+        >
+      </p>
+
+      @if (store.hasSelection()) {
+        <button
+          (click)="store.clearSelection()"
+          type="button"
+          class="px-4 py-2 bg-background-dark hover:bg-background-darker text-white text-sm rounded transition-colors float-right"
+        >
+          Clear selection
+        </button>
+      }
+    </div>
+  }
+</div>

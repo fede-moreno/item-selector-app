@@ -1,0 +1,61 @@
+﻿<div
+  class="border rounded w-[275px]"
+  role="tree"
+  aria-label="Folder and item selector"
+>
+  @for (node of nodes(); track node.id) {
+    <ng-container *ngTemplateOutlet="nodeTemplate; context: { node: node, level: 0 }"/>
+  }
+</div>
+
+<ng-template #nodeTemplate let-node="node" let-level="level">
+  <div
+    role="treeitem"
+    [attr.aria-level]="level + 1"
+    [attr.aria-expanded]="isFolder(node) ? node.expanded : null"
+    [attr.aria-selected]="node.selected"
+    class="flex items-center gap-2 py-2 pr-4 cursor-pointer hover:bg-background-hover transition-colors sr-only:focus-within:ring-2"
+    [style.padding-left.px]="(level + 1) * 16"
+    (click)="onNodeClick($event, node)"
+    tabindex="0"
+    (keydown.space)="onNodeClick($event, node)"
+    (keydown.enter)="onNodeClick($event, node)"
+    (keydown.arrowRight)="isFolder(node) && !node.expanded && onToggleExpand($event, node.id)"
+    (keydown.arrowLeft)="isFolder(node) && node.expanded && onToggleExpand($event, node.id)"
+  >
+    <input
+      type="checkbox"
+      [checked]="node.selected"
+      [indeterminate]="isFolder(node) && node.indeterminate"
+      (change)="onNodeClick($event, node)"
+      (click)="$event.stopPropagation()"
+      tabindex="-1"
+      [attr.aria-label]="'Select ' + node.title"
+    />
+
+    <span class="text-sm flex-1" [class.font-semibold]="isFolder(node)">{{ node.title }}</span>
+
+    @if (isFolder(node)) {
+      <button
+        type="button"
+        class="w-5 h-5 p-0 border-0 flex items-center justify-center transition-transform ml-auto sr-only:focus:outline-none sr-only:focus:ring-2 sr-only:focus:ring-blue-500"
+        [class.rotate-0]="node.expanded"
+        [class.-rotate-180]="!node.expanded"
+        [attr.aria-label]="(node.expanded ? 'Collapse ' : 'Expand ') + node.title"
+        [attr.aria-expanded]="node.expanded"
+        (click)="onToggleExpand($event, node.id)"
+        tabindex="-1"
+      >
+        <app-chevron-icon [attr.aria-hidden]="true" />
+      </button>
+    }
+  </div>
+
+  @if (isFolder(node) && node.expanded) {
+    <div role="group" [attr.aria-label]="node.title + ' contents'">
+      @for (child of node.children; track child.id) {
+        <ng-container *ngTemplateOutlet="nodeTemplate; context: { node: child, level: level + 1 }"/>
+      }
+    </div>
+  }
+</ng-template>
